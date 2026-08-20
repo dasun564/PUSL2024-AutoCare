@@ -7,7 +7,10 @@ import lk.ac.nsbm.autocare.controller.AuthController;
 import lk.ac.nsbm.autocare.controller.CustomerJobController;
 import lk.ac.nsbm.autocare.controller.PartBrowseController;
 import org.slf4j.Logger;
+import lk.ac.nsbm.autocare.repository.AppUserRepository;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -51,6 +54,30 @@ public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+    private final AppUserRepository appUserRepository;
+
+    public GlobalExceptionHandler(AppUserRepository appUserRepository) {
+        this.appUserRepository = appUserRepository;
+    }
+
+    /**
+     * Adds the signed-in user's name to an error view.
+     *
+     * Spring does not apply a @ModelAttribute method from CurrentUserAdvice to
+     * a view produced by an @ExceptionHandler, so without this the navigation
+     * bar on every error page would read "Signed in as" followed by nothing.
+     */
+    private void addCurrentUser(ModelAndView mav) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            return;
+        }
+        mav.addObject("currentUsername", auth.getName());
+        mav.addObject("currentUserFullName", appUserRepository.findByUsername(auth.getName())
+                .map(user -> user.getFullName())
+                .orElse(auth.getName()));
+    }
+
     @ExceptionHandler(AutoCareException.class)
     public ModelAndView handleBusinessFailure(AutoCareException ex, HttpServletRequest request) {
         log.warn("Business rule rejected {} {}: [{}] {}",
@@ -67,6 +94,7 @@ public class GlobalExceptionHandler {
                 ex instanceof TooManyOpenJobsException
                         || ex instanceof GarageFullyBookedException
                         || ex instanceof InvalidBookingDateException);
+        addCurrentUser(mav);
         return mav;
     }
 
@@ -86,6 +114,7 @@ public class GlobalExceptionHandler {
         mav.addObject("errorCode", "INTERNAL_ERROR");
         mav.addObject("stockFailure", false);
         mav.addObject("bookingFailure", false);
+        addCurrentUser(mav);
         return mav;
     }
 }
