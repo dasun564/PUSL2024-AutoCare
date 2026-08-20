@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Sign in')}"></head>
+<body>
+
+<main class="container">
+    <div class="login-shell">
+
+        <div class="text-center mb-4">
+            <h1 class="h3 mb-1">
+                <span class="brand-mark">AC</span> AutoCare
+            </h1>
+            <p class="text-muted mb-0">Vehicle Service Management System</p>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+
+                <div th:if="${param.error}" class="alert alert-danger py-2">
+                    That username and password did not match an account.
+                </div>
+                <div th:if="${param.loggedOut}" class="alert alert-success py-2">
+                    You have been signed out.
+                </div>
+
+                <form th:action="@{/login}" method="post">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" id="username" name="username" class="form-control" autofocus required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" id="password" name="password" class="form-control" required>
+                    </div>
+                    <button class="btn btn-primary w-100" type="submit">Sign in</button>
+                </form>
+
+            </div>
+        </div>
+
+        <!--
+          Demonstration accounts, present so the coursework evidence can be
+          reproduced. A production system would not list credentials here.
+        -->
+        <div class="card mt-3 border-0">
+            <div class="card-body">
+                <h2 class="h6 text-muted mb-2">Demonstration accounts</h2>
+                <table class="credential-table">
+                    <tr>
+                        <td><code>10965261</code></td>
+                        <td><code>customer123</code></td>
+                        <td class="text-muted">customer, 2 vehicles, 1 job open</td>
+                    </tr>
+                    <tr>
+                        <td><code>10965261B</code></td>
+                        <td><code>customer123</code></td>
+                        <td class="text-muted">customer at the open-job limit</td>
+                    </tr>
+                    <tr>
+                        <td><code>admin10965261</code></td>
+                        <td><code>admin123</code></td>
+                        <td class="text-muted">garage staff</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

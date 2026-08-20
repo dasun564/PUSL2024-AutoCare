@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Job diary')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container">
+
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <div>
+            <h1 class="h3 mb-1">Job diary</h1>
+            <p class="text-muted mb-0">Every service job booked into the workshop.</p>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/layout :: flash}"></div>
+
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                <tr>
+                    <th>Job</th>
+                    <th>Booked for</th>
+                    <th>Vehicle</th>
+                    <th>Customer</th>
+                    <th>Status</th>
+                    <th class="text-end">Invoice</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="job : ${jobs}">
+                    <td class="job-number" th:text="${job.jobNumber()}">AC-0000</td>
+                    <td class="small" th:text="${#temporals.format(job.bookedFor(), 'EEE d MMM yyyy')}">date</td>
+                    <td>
+                        <code th:text="${job.registrationNumber()}">REG</code>
+                        <div class="small text-muted" th:text="${job.vehicleDescription()}">Make Model</div>
+                    </td>
+                    <td class="small">
+                        <span th:text="${job.customerName()}">Customer</span>
+                        <div class="text-muted" th:text="${job.customerUsername()}">username</div>
+                    </td>
+                    <td>
+                        <span th:replace="~{fragments/layout :: statusBadge(${job.status()})}"></span>
+                    </td>
+                    <td class="text-end money">
+                        <span th:if="${job.grandTotal() != null}"
+                              th:text="'LKR ' + ${#numbers.formatDecimal(job.grandTotal(), 1, 'COMMA', 2, 'POINT')}">
+                        </span>
+                        <span th:unless="${job.grandTotal() != null}" class="text-muted">-</span>
+                    </td>
+                    <td class="text-end">
+                        <a class="btn btn-sm btn-outline-primary"
+                           th:href="@{/admin/jobs/{id}(id=${job.id()})}">Open</a>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(jobs)}">
+                    <td colspan="7" class="text-center text-muted py-5">No jobs booked.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

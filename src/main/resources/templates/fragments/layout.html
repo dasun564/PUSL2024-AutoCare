@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:fragment="head(pageTitle)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="'AutoCare - ' + ${pageTitle}">AutoCare</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+
+<!-- ===================== Navigation ===================== -->
+<nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark navbar-autocare mb-4">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" th:href="@{/}">
+            <span class="brand-mark">AC</span> AutoCare
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="nav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item" sec:authorize="hasRole('CUSTOMER')">
+                    <a class="nav-link" th:href="@{/my-jobs}">My Service Jobs</a>
+                </li>
+                <li class="nav-item" sec:authorize="hasRole('CUSTOMER')">
+                    <a class="nav-link" th:href="@{/book}">Book a Service</a>
+                </li>
+                <li class="nav-item" sec:authorize="hasRole('CUSTOMER')">
+                    <a class="nav-link" th:href="@{/my-vehicles}">My Vehicles</a>
+                </li>
+                <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                    <a class="nav-link" th:href="@{/admin/jobs}">Job Diary</a>
+                </li>
+                <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                    <a class="nav-link" th:href="@{/admin/parts}">Inventory</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/parts}">Price List</a>
+                </li>
+            </ul>
+
+            <div class="d-flex align-items-center gap-3" sec:authorize="isAuthenticated()">
+                <span class="text-white-50 small">
+                    Signed in as
+                    <strong class="text-white" th:text="${currentUserFullName}">Name</strong>
+                    <span class="badge text-bg-light ms-1" th:text="${currentUsername}">username</span>
+                </span>
+                <form th:action="@{/logout}" method="post" class="m-0">
+                    <button class="btn btn-sm btn-outline-light" type="submit">Log out</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- ===================== Booking capacity banner ===================== -->
+<div th:fragment="capacityBanner(capacity)" th:if="${capacity != null}">
+    <div class="alert capacity-banner mb-4"
+         th:classappend="${capacity.canBook()} ? 'alert-light' : 'alert-warning blocked'">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <strong>Booking allowance:</strong>
+                <span th:text="${capacity.openJobs()} + ' of ' + ${capacity.openJobLimit()} + ' service jobs open'">
+                    0 of 2</span>
+                <span class="text-muted" th:if="${capacity.canBook()}"
+                      th:text="'- you may book ' + ${capacity.remainingAllowance()} + ' more'"></span>
+            </div>
+            <div>
+                <span class="badge text-bg-danger" th:if="${capacity.hasNoVehicles()}">
+                    No vehicle registered
+                </span>
+                <span class="badge text-bg-danger"
+                      th:if="${!capacity.canBook() and !capacity.hasNoVehicles()}">
+                    Blocked: open-job limit reached
+                </span>
+            </div>
+        </div>
+        <div class="small text-muted mt-2">
+            The garage accepts <span th:text="${capacity.dailyCapacity()}">4</span> vehicles per day
+            and is closed on Sundays.
+        </div>
+    </div>
+</div>
+
+<!-- ===================== Flash message ===================== -->
+<div th:fragment="flash" th:if="${flash}" class="alert alert-success" th:text="${flash}"></div>
+
+<!-- ===================== Job status badge ===================== -->
+<span th:fragment="statusBadge(status)">
+    <span class="badge text-bg-info"      th:if="${status.name() == 'BOOKED'}">Booked</span>
+    <span class="badge text-bg-primary"   th:if="${status.name() == 'IN_PROGRESS'}">In progress</span>
+    <span class="badge text-bg-success"   th:if="${status.name() == 'COMPLETED'}">Completed</span>
+    <span class="badge text-bg-secondary" th:if="${status.name() == 'CANCELLED'}">Cancelled</span>
+</span>
+
+<!-- ===================== Footer ===================== -->
+<footer th:fragment="footer" class="site-footer mt-5 py-3">
+    <div class="container d-flex justify-content-between flex-wrap gap-2">
+        <span>AutoCare - Vehicle Service Management System</span>
+        <span>PUSL2024 Software Engineering 2 &middot; Dasun Edirisinghe &middot; 10965261</span>
+    </div>
+</footer>
+
+</body>
+</html>

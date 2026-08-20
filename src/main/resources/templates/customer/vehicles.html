@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('My vehicles')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container">
+
+    <h1 class="h3 mb-3">My vehicles</h1>
+
+    <div th:replace="~{fragments/layout :: flash}"></div>
+
+    <div class="row g-4">
+
+        <div class="col-lg-7">
+            <div class="card shadow-sm">
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead class="table-light">
+                        <tr>
+                            <th>Registration</th>
+                            <th>Vehicle</th>
+                            <th class="text-end">Mileage</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="v : ${vehicles}">
+                            <td><code th:text="${v.registrationNumber()}">REG</code></td>
+                            <td th:text="${v.description()}">Make Model</td>
+                            <td class="text-end money"
+                                th:text="${#numbers.formatInteger(v.mileageKm(), 0, 'COMMA')} + ' km'">0 km</td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(vehicles)}">
+                            <td colspan="3" class="text-center text-muted py-4">
+                                No vehicles registered yet. Add one to book a service.
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h2 class="h5 mb-3">Register a vehicle</h2>
+
+                    <form th:action="@{/my-vehicles}" th:object="${vehicleForm}" method="post" novalidate>
+
+                        <div th:if="${#fields.hasAnyErrors()}" class="alert alert-danger py-2 small">
+                            Please correct the highlighted fields.
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="registrationNumber">Registration number</label>
+                            <input type="text" id="registrationNumber" class="form-control"
+                                   th:field="*{registrationNumber}" placeholder="WP-CAR-1234"
+                                   th:classappend="${#fields.hasErrors('registrationNumber')} ? 'is-invalid' : ''">
+                            <div class="invalid-feedback" th:errors="*{registrationNumber}"></div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label class="form-label" for="make">Make</label>
+                                <input type="text" id="make" class="form-control" th:field="*{make}"
+                                       th:classappend="${#fields.hasErrors('make')} ? 'is-invalid' : ''">
+                                <div class="invalid-feedback" th:errors="*{make}"></div>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="form-label" for="model">Model</label>
+                                <input type="text" id="model" class="form-control" th:field="*{model}"
+                                       th:classappend="${#fields.hasErrors('model')} ? 'is-invalid' : ''">
+                                <div class="invalid-feedback" th:errors="*{model}"></div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label class="form-label" for="year">Year</label>
+                                <input type="number" id="year" class="form-control" th:field="*{year}"
+                                       th:classappend="${#fields.hasErrors('year')} ? 'is-invalid' : ''">
+                                <div class="invalid-feedback" th:errors="*{year}"></div>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="form-label" for="mileageKm">Mileage (km)</label>
+                                <input type="number" id="mileageKm" class="form-control" th:field="*{mileageKm}"
+                                       th:classappend="${#fields.hasErrors('mileageKm')} ? 'is-invalid' : ''">
+                                <div class="invalid-feedback" th:errors="*{mileageKm}"></div>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary w-100" type="submit">Register vehicle</button>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

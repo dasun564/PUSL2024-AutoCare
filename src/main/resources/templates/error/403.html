@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Access denied')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container">
+    <div class="narrow-shell">
+
+        <div class="card shadow-sm border-warning">
+            <div class="card-body p-4">
+
+                <span class="badge text-bg-warning mb-3">403 - Access denied</span>
+
+                <h1 class="h4 mb-3">You do not have permission to open that page</h1>
+
+                <p class="lead">
+                    Your account is signed in, but this area is restricted to garage staff.
+                </p>
+
+                <div class="alert alert-light border small">
+                    Access is decided by role. Workshop management under <code>/admin/**</code>
+                    requires <code>ROLE_ADMIN</code>; booking and job history require
+                    <code>ROLE_CUSTOMER</code>. The check runs in the Spring Security filter chain
+                    before the request reaches any controller, and again on the service method
+                    itself through <code>@PreAuthorize</code>.
+                </div>
+
+                <div class="d-flex gap-2">
+                    <a class="btn btn-primary" th:href="@{/}">Go to my home page</a>
+                    <form th:action="@{/logout}" method="post" class="m-0">
+                        <button class="btn btn-outline-secondary" type="submit">Sign in as someone else</button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

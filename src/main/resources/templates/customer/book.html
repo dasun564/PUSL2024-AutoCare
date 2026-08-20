@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Book a service')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container">
+    <div class="narrow-shell">
+
+        <h1 class="h3 mb-3">Book a service</h1>
+
+        <div th:replace="~{fragments/layout :: capacityBanner(${capacity})}"></div>
+
+        <div th:if="${#lists.isEmpty(vehicles)}" class="alert alert-info">
+            You have no vehicles registered yet.
+            <a th:href="@{/my-vehicles}">Register a vehicle</a> before booking.
+        </div>
+
+        <div class="card shadow-sm" th:unless="${#lists.isEmpty(vehicles)}">
+            <div class="card-body p-4">
+
+                <!--
+                  The form carries a vehicle id and a date. It does NOT carry a
+                  customer id: the account the booking is charged to comes from
+                  the authenticated session inside CustomerJobController, and
+                  the chosen vehicle is checked against that account in the
+                  service layer.
+                -->
+                <form th:action="@{/book}" th:object="${bookingForm}" method="post" novalidate>
+
+                    <div th:if="${#fields.hasAnyErrors()}" class="alert alert-danger py-2">
+                        Please correct the highlighted fields.
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="vehicleId">Vehicle</label>
+                        <select id="vehicleId" class="form-select" th:field="*{vehicleId}"
+                                th:classappend="${#fields.hasErrors('vehicleId')} ? 'is-invalid' : ''">
+                            <option value="">Choose a vehicle</option>
+                            <option th:each="v : ${vehicles}"
+                                    th:value="${v.id()}"
+                                    th:text="${v.registrationNumber()} + ' - ' + ${v.description()}">REG</option>
+                        </select>
+                        <div class="invalid-feedback" th:errors="*{vehicleId}"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="bookedFor">Preferred date</label>
+                        <input type="date" id="bookedFor" class="form-control" th:field="*{bookedFor}"
+                               th:classappend="${#fields.hasErrors('bookedFor')} ? 'is-invalid' : ''">
+                        <div class="invalid-feedback" th:errors="*{bookedFor}"></div>
+                        <div class="form-text">
+                            Monday to Saturday, from today up to 90 days ahead.
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="reportedProblem">What is wrong with the vehicle?</label>
+                        <textarea id="reportedProblem" rows="4" class="form-control"
+                                  th:field="*{reportedProblem}"
+                                  placeholder="Describe the symptoms, when they happen, and any warning lights."
+                                  th:classappend="${#fields.hasErrors('reportedProblem')} ? 'is-invalid' : ''"></textarea>
+                        <div class="invalid-feedback" th:errors="*{reportedProblem}"></div>
+                    </div>
+
+                    <button class="btn btn-primary btn-lg" type="submit">Request this booking</button>
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

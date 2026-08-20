@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Parts price list')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container">
+
+    <h1 class="h3 mb-1">Parts price list</h1>
+    <p class="text-muted">Search by part name, part number or category.</p>
+
+    <form th:action="@{/parts}" method="get" class="row g-2 mb-4">
+        <div class="col-md-8">
+            <input type="text" name="q" class="form-control"
+                   placeholder="Search parts" th:value="${query}">
+        </div>
+        <div class="col-md-2 d-grid">
+            <button class="btn btn-primary" type="submit">Search</button>
+        </div>
+        <div class="col-md-2 d-grid">
+            <a class="btn btn-outline-secondary" th:href="@{/parts}">Clear</a>
+        </div>
+    </form>
+
+    <div th:if="${query != null and !query.isBlank()}" class="mb-3 text-muted">
+        <span th:text="${#lists.size(parts)} + ' result(s) for &quot;' + ${query} + '&quot;'"></span>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+        <div class="col" th:each="p : ${parts}">
+            <div class="card card-part">
+                <div class="card-body d-flex flex-column">
+
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <span class="badge text-bg-secondary" th:text="${p.partType()}">Type</span>
+                        <span class="badge"
+                              th:classappend="${p.stockQuantity() > 0} ? 'text-bg-success' : 'text-bg-danger'"
+                              th:text="${p.stockQuantity() > 0}
+                                       ? ${p.stockQuantity()} + ' in stock' : 'Out of stock'">stock</span>
+                    </div>
+
+                    <h2 class="h6 card-title" th:text="${p.name()}">Part</h2>
+                    <p class="small text-muted mb-1">
+                        <span th:text="${p.partNumber()}">NUM</span>
+                        &middot;
+                        <span th:text="${p.category()}">Category</span>
+                    </p>
+                    <p class="small text-muted flex-grow-1" th:text="${p.handlingNote()}">Note</p>
+
+                    <div class="invoice-total money"
+                         th:text="'LKR ' + ${#numbers.formatDecimal(p.unitPrice(), 1, 'COMMA', 2, 'POINT')}">0</div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${#lists.isEmpty(parts)}" class="alert alert-light border text-center py-5">
+        <h2 class="h5">No parts matched your search</h2>
+        <p class="text-muted mb-0">Try a different name, part number or category.</p>
+    </div>
+
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

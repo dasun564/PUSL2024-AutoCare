@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Inventory')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container">
+
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <div>
+            <h1 class="h3 mb-1">Parts inventory</h1>
+            <p class="text-muted mb-0">Add, edit, withdraw and stocktake workshop parts.</p>
+        </div>
+        <a class="btn btn-primary" th:href="@{/admin/parts/new}">Add part</a>
+    </div>
+
+    <div th:replace="~{fragments/layout :: flash}"></div>
+
+    <div th:if="${!#lists.isEmpty(lowStock)}" class="alert alert-warning">
+        <strong>Low stock:</strong>
+        <span th:each="p,it : ${lowStock}">
+            <span th:text="${p.partNumber()} + ' (' + ${p.stockQuantity()} + ')'"></span><span
+                th:if="${!it.last}">, </span>
+        </span>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                <tr>
+                    <th>Part</th>
+                    <th>Category</th>
+                    <th>Type</th>
+                    <th class="text-end">Unit price</th>
+                    <th class="text-center">Stock</th>
+                    <th>State</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="p : ${parts}" th:classappend="${!p.active()} ? 'table-secondary' : ''">
+                    <td>
+                        <span th:text="${p.name()}">Part</span>
+                        <div class="small text-muted" th:text="${p.partNumber()}">NUM</div>
+                    </td>
+                    <td class="small" th:text="${p.category()}">Category</td>
+                    <td class="small" th:text="${p.partType()}">Type</td>
+                    <td class="text-end money"
+                        th:text="${#numbers.formatDecimal(p.unitPrice(), 1, 'COMMA', 2, 'POINT')}">0</td>
+                    <td class="text-center">
+                        <span th:text="${p.stockQuantity()}">0</span>
+                        <span class="badge text-bg-warning ms-1" th:if="${p.lowStock()}">low</span>
+                    </td>
+                    <td>
+                        <span class="badge text-bg-success" th:if="${p.active()}">In inventory</span>
+                        <span class="badge text-bg-secondary" th:unless="${p.active()}">Withdrawn</span>
+                    </td>
+                    <td class="text-end">
+                        <div class="d-inline-flex gap-1 align-items-center">
+
+                            <form th:action="@{/admin/parts/{id}/stocktake(id=${p.id()})}" method="post"
+                                  class="d-inline-flex gap-1 m-0">
+                                <input type="number" name="countedQuantity" class="form-control form-control-sm"
+                                       style="width: 5rem" min="0" th:value="${p.stockQuantity()}">
+                                <button class="btn btn-sm btn-outline-secondary" type="submit"
+                                        title="Record a stocktake count">Count</button>
+                            </form>
+
+                            <a class="btn btn-sm btn-outline-secondary"
+                               th:href="@{/admin/parts/{id}/edit(id=${p.id()})}">Edit</a>
+
+                            <!--
+                              "Withdraw" is a SOFT delete: the row stays so that
+                              historic job lines keep a valid foreign key and
+                              past invoices remain readable.
+                            -->
+                            <form th:if="${p.active()}" th:action="@{/admin/parts/{id}/withdraw(id=${p.id()})}"
+                                  method="post" class="m-0"
+                                  onsubmit="return confirm('Withdraw this part from the inventory? Job history will be preserved.');">
+                                <button class="btn btn-sm btn-outline-danger" type="submit">Withdraw</button>
+                            </form>
+
+                            <form th:unless="${p.active()}" th:action="@{/admin/parts/{id}/restore(id=${p.id()})}"
+                                  method="post" class="m-0">
+                                <button class="btn btn-sm btn-outline-success" type="submit">Restore</button>
+                            </form>
+
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

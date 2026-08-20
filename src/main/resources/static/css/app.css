@@ -1,0 +1,102 @@
+/* AutoCare - presentation layer only. */
+
+:root {
+    --ac-ink: #1b2430;
+    --ac-accent: #c2410c;
+    --ac-accent-soft: #fff1e9;
+    --ac-soft: #f5f6f8;
+}
+
+body {
+    background-color: var(--ac-soft);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1 0 auto;
+}
+
+.navbar-autocare {
+    background-color: var(--ac-ink);
+}
+
+.navbar-autocare .navbar-brand {
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.brand-mark {
+    background: var(--ac-accent);
+    color: #fff;
+    border-radius: 6px;
+    padding: 0.1rem 0.45rem;
+    margin-right: 0.5rem;
+    font-weight: 800;
+}
+
+.capacity-banner {
+    border-left: 4px solid var(--ac-accent);
+}
+
+.capacity-banner.blocked {
+    border-left-color: #b02a37;
+}
+
+.card-part {
+    height: 100%;
+    border: 1px solid #e3e7ef;
+    transition: box-shadow 0.15s ease-in-out;
+}
+
+.card-part:hover {
+    box-shadow: 0 0.5rem 1.25rem rgba(27, 36, 48, 0.12);
+}
+
+.login-shell {
+    max-width: 27rem;
+    margin: 3.5rem auto;
+}
+
+.narrow-shell {
+    max-width: 46rem;
+    margin: 0 auto;
+}
+
+.credential-table td {
+    font-size: 0.85rem;
+    padding: 0.2rem 0.55rem 0.2rem 0;
+}
+
+.credential-table code {
+    color: var(--ac-ink);
+}
+
+.error-code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    color: #6c757d;
+}
+
+.money {
+    font-variant-numeric: tabular-nums;
+}
+
+.invoice-total {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--ac-ink);
+}
+
+.job-number {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    letter-spacing: 0.04em;
+}
+
+footer.site-footer {
+    background: var(--ac-ink);
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 0.85rem;
+}

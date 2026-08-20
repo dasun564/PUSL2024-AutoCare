@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Booking confirmed')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container">
+    <div class="narrow-shell">
+
+        <div class="card shadow-sm border-success">
+            <div class="card-body p-4">
+
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <span class="badge text-bg-success">Booking confirmed</span>
+                    <span class="job-number error-code" th:text="${job.jobNumber()}">AC-0000</span>
+                </div>
+
+                <h1 class="h4 mb-3">Your vehicle is booked in</h1>
+
+                <!--
+                  The customer's own name comes from the job's vehicle owner,
+                  which the service resolved from the authenticated session -
+                  never from the submitted form.
+                -->
+                <p class="lead">
+                    <span th:text="${job.customerName()}">Customer</span>
+                    <span class="badge text-bg-dark align-middle" th:text="${job.customerUsername()}">username</span>
+                </p>
+
+                <div class="card bg-light border-0 mb-4">
+                    <div class="card-body">
+                        <dl class="row mb-0">
+                            <dt class="col-sm-4">Job number</dt>
+                            <dd class="col-sm-8 job-number" th:text="${job.jobNumber()}">AC-0000</dd>
+
+                            <dt class="col-sm-4">Vehicle</dt>
+                            <dd class="col-sm-8">
+                                <code th:text="${job.registrationNumber()}">REG</code>
+                                <span th:text="${job.vehicleDescription()}">Make Model</span>
+                            </dd>
+
+                            <dt class="col-sm-4">Booked for</dt>
+                            <dd class="col-sm-8">
+                                <strong th:text="${#temporals.format(job.bookedFor(), 'EEEE d MMMM yyyy')}">date</strong>
+                            </dd>
+
+                            <dt class="col-sm-4">Reported problem</dt>
+                            <dd class="col-sm-8" th:text="${job.reportedProblem()}">Problem</dd>
+
+                            <dt class="col-sm-4">Status</dt>
+                            <dd class="col-sm-8">
+                                <span th:replace="~{fragments/layout :: statusBadge(${job.status()})}"></span>
+                            </dd>
+
+                            <dt class="col-sm-4">Labour rate</dt>
+                            <dd class="col-sm-8 money"
+                                th:text="'LKR ' + ${#numbers.formatDecimal(job.labourRate(), 1, 'COMMA', 2, 'POINT')} + ' per hour'">
+                                rate</dd>
+                        </dl>
+                    </div>
+                </div>
+
+                <p class="text-muted small">
+                    Please bring the vehicle to the workshop by 09:00 on the booked date. A final
+                    invoice is produced once the work is complete and the parts used are confirmed.
+                </p>
+
+                <div class="d-flex gap-2">
+                    <a class="btn btn-primary" th:href="@{/my-jobs}">View my service jobs</a>
+                    <a class="btn btn-outline-secondary" th:href="@{/book}">Book another</a>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

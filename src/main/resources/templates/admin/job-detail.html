@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Work on job')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container">
+
+    <a class="btn btn-sm btn-link ps-0 mb-2" th:href="@{/admin/jobs}">&larr; Back to the job diary</a>
+
+    <div th:replace="~{fragments/layout :: flash}"></div>
+
+    <div class="row g-4">
+
+        <!-- ---------------- job summary and lines ---------------- -->
+        <div class="col-lg-7">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+
+                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+                        <div>
+                            <h1 class="h4 mb-1">
+                                Job <span class="job-number" th:text="${job.jobNumber()}">AC-0000</span>
+                            </h1>
+                            <p class="text-muted mb-0">
+                                <code th:text="${job.registrationNumber()}">REG</code>
+                                <span th:text="${job.vehicleDescription()}">Make Model</span>
+                                &middot;
+                                <span th:text="${job.customerName()}">Customer</span>
+                            </p>
+                        </div>
+                        <span th:replace="~{fragments/layout :: statusBadge(${job.status()})}"></span>
+                    </div>
+
+                    <div class="alert alert-light border small">
+                        <strong>Reported:</strong>
+                        <span th:text="${job.reportedProblem()}">Problem</span>
+                    </div>
+
+                    <h2 class="h6 text-muted">Planned parts</h2>
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle">
+                            <thead class="table-light">
+                            <tr>
+                                <th>Part</th>
+                                <th class="text-center">Qty</th>
+                                <th class="text-center">In stock</th>
+                                <th class="text-end">Line total</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="line : ${job.lines()}"
+                                th:classappend="${line.shortOfStock()} ? 'table-danger' : ''">
+                                <td>
+                                    <span th:text="${line.partName()}">Part</span>
+                                    <div class="small text-muted" th:text="${line.partNumber()}">NUM</div>
+                                </td>
+                                <td class="text-center" th:text="${line.quantity()}">1</td>
+                                <td class="text-center">
+                                    <span th:text="${line.stockOnHand()}">0</span>
+                                    <span class="badge text-bg-danger ms-1" th:if="${line.shortOfStock()}">short</span>
+                                </td>
+                                <td class="text-end money"
+                                    th:text="${#numbers.formatDecimal(line.lineTotal(), 1, 'COMMA', 2, 'POINT')}">0</td>
+                                <td class="text-end">
+                                    <form th:if="${job.isOpen()}"
+                                          th:action="@{/admin/jobs/{id}/lines/{lineId}/remove(id=${job.id()},lineId=${line.id()})}"
+                                          method="post" class="m-0">
+                                        <button class="btn btn-sm btn-outline-danger" type="submit">&times;</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(job.lines())}">
+                                <td colspan="5" class="text-center text-muted py-3">
+                                    No parts planned yet.
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="d-flex justify-content-end">
+                        <table class="table table-sm w-auto mb-0">
+                            <tr>
+                                <td class="text-muted pe-4">Parts</td>
+                                <td class="text-end money"
+                                    th:text="'LKR ' + ${#numbers.formatDecimal(job.partsTotal(), 1, 'COMMA', 2, 'POINT')}">0</td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted pe-4">Labour</td>
+                                <td class="text-end money"
+                                    th:text="'LKR ' + ${#numbers.formatDecimal(job.labourTotal(), 1, 'COMMA', 2, 'POINT')}">0</td>
+                            </tr>
+                            <tr class="border-top">
+                                <td class="pe-4"><strong>Estimate</strong></td>
+                                <td class="text-end invoice-total money"
+                                    th:text="'LKR ' + ${#numbers.formatDecimal(job.grandTotal(), 1, 'COMMA', 2, 'POINT')}">0</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- ---------------- actions ---------------- -->
+        <div class="col-lg-5">
+
+            <div class="card shadow-sm mb-3" th:if="${job.isOpen()}">
+                <div class="card-body">
+                    <h2 class="h6 mb-3">Add a part</h2>
+                    <form th:action="@{/admin/jobs/{id}/lines(id=${job.id()})}" method="post" class="row g-2">
+                        <div class="col-8">
+                            <select name="partId" class="form-select" required>
+                                <option value="">Choose a part</option>
+                                <option th:each="p : ${parts}" th:value="${p.id()}"
+                                        th:text="${p.partNumber()} + ' - ' + ${p.name()} + ' (' + ${p.stockQuantity()} + ' in stock)'">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-4">
+                            <input type="number" name="quantity" class="form-control" min="1" value="1" required>
+                        </div>
+                        <div class="col-12 d-grid">
+                            <button class="btn btn-outline-primary" type="submit">Add to job</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-3" th:if="${job.isOpen()}">
+                <div class="card-body">
+                    <h2 class="h6 mb-3">Labour</h2>
+                    <form th:action="@{/admin/jobs/{id}/labour(id=${job.id()})}" method="post" class="row g-2">
+                        <div class="col-8">
+                            <input type="number" step="0.25" min="0" name="hours" class="form-control"
+                                   th:value="${job.labourHours()}" required>
+                        </div>
+                        <div class="col-4 d-grid">
+                            <button class="btn btn-outline-primary" type="submit">Save</button>
+                        </div>
+                        <div class="col-12 form-text"
+                             th:text="'Charged at LKR ' + ${#numbers.formatDecimal(job.labourRate(), 1, 'COMMA', 2, 'POINT')} + ' per hour'">
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-body d-grid gap-2">
+
+                    <form th:if="${job.status().name() == 'BOOKED'}"
+                          th:action="@{/admin/jobs/{id}/start(id=${job.id()})}" method="post" class="d-grid">
+                        <button class="btn btn-secondary" type="submit">Start work</button>
+                    </form>
+
+                    <!--
+                      Completing the job consumes every planned part from stock
+                      and raises the invoice in ONE transaction. If any part is
+                      short, nothing is consumed and the job stays open.
+                    -->
+                    <form th:if="${job.isOpen()}"
+                          th:action="@{/admin/jobs/{id}/complete(id=${job.id()})}" method="post" class="d-grid">
+                        <button class="btn btn-success btn-lg" type="submit">
+                            Complete job &amp; raise invoice
+                        </button>
+                    </form>
+
+                    <a th:unless="${job.isOpen()}" class="btn btn-outline-secondary"
+                       th:href="@{/admin/jobs}">This job is closed - back to diary</a>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Invoice')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container">
+    <div class="narrow-shell">
+
+        <div class="card shadow-sm border-success">
+            <div class="card-body p-4">
+
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <span class="badge text-bg-success">Job completed</span>
+                    <span class="error-code">Parts consumed from stock &middot; invoice raised</span>
+                </div>
+
+                <h1 class="h4 mb-1">
+                    Invoice for job <span class="job-number" th:text="${job.jobNumber()}">AC-0000</span>
+                </h1>
+                <p class="text-muted">
+                    <code th:text="${job.registrationNumber()}">REG</code>
+                    <span th:text="${job.vehicleDescription()}">Make Model</span>
+                    &middot;
+                    <span th:text="${job.customerName()}">Customer</span>
+                    <span class="badge text-bg-dark" th:text="${job.customerUsername()}">username</span>
+                </p>
+
+                <dl class="row small mb-4">
+                    <dt class="col-sm-3">Booked for</dt>
+                    <dd class="col-sm-9" th:text="${#temporals.format(job.bookedFor(), 'd MMMM yyyy')}">date</dd>
+
+                    <dt class="col-sm-3">Completed</dt>
+                    <dd class="col-sm-9"
+                        th:text="${job.closedAt() != null}
+                                 ? ${#temporals.format(job.closedAt(), 'd MMMM yyyy, HH:mm')} : ''">date</dd>
+
+                    <dt class="col-sm-3">Work carried out</dt>
+                    <dd class="col-sm-9" th:text="${job.reportedProblem()}">Problem</dd>
+                </dl>
+
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm align-middle">
+                        <thead class="table-light">
+                        <tr>
+                            <th>Part fitted</th>
+                            <th class="text-center">Qty</th>
+                            <th class="text-end">Unit price</th>
+                            <th class="text-end">Line total</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="line : ${job.lines()}">
+                            <td>
+                                <span th:text="${line.partName()}">Part</span>
+                                <div class="small text-muted">
+                                    <span th:text="${line.partNumber()}">NUM</span>
+                                    &middot;
+                                    <span th:text="${line.partType()}">Type</span>
+                                </div>
+                            </td>
+                            <td class="text-center" th:text="${line.quantity()}">1</td>
+                            <td class="text-end money"
+                                th:text="${#numbers.formatDecimal(line.unitPriceAtTime(), 1, 'COMMA', 2, 'POINT')}">0</td>
+                            <td class="text-end money"
+                                th:text="${#numbers.formatDecimal(line.lineTotal(), 1, 'COMMA', 2, 'POINT')}">0</td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(job.lines())}">
+                            <td colspan="4" class="text-center text-muted py-3">Labour only - no parts fitted.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-end">
+                    <table class="table table-sm w-auto mb-0">
+                        <tr>
+                            <td class="text-muted pe-4">Parts</td>
+                            <td class="text-end money"
+                                th:text="'LKR ' + ${#numbers.formatDecimal(job.partsTotal(), 1, 'COMMA', 2, 'POINT')}">0</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted pe-4">
+                                Labour
+                                <span class="small" th:text="'(' + ${job.labourHours()} + ' h)'">(0 h)</span>
+                            </td>
+                            <td class="text-end money"
+                                th:text="'LKR ' + ${#numbers.formatDecimal(job.labourTotal(), 1, 'COMMA', 2, 'POINT')}">0</td>
+                        </tr>
+                        <tr class="border-top">
+                            <td class="pe-4"><strong>Total due</strong></td>
+                            <td class="text-end invoice-total money"
+                                th:text="'LKR ' + ${#numbers.formatDecimal(job.grandTotal(), 1, 'COMMA', 2, 'POINT')}">0</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="d-flex gap-2 mt-4">
+                    <a class="btn btn-primary" th:href="@{/admin/jobs}">Back to the job diary</a>
+                    <a class="btn btn-outline-secondary" th:href="@{/admin/parts}">Check inventory levels</a>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
